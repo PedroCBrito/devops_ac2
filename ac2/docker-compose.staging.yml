@@ -1,0 +1,20 @@
+services:
+  database:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: stag_db
+    volumes:
+      - db-volume:/var/lib/postgresql/data
+
+  api:
+    image: pedrocbrito/ac2:latest
+    networks:
+      - default  # Certifique-se de que está usando a rede adequada
+    environment:
+      DB_HOST: database
+    ports:
+      - "8686:8080"
+
+volumes:
+  db-volume:
