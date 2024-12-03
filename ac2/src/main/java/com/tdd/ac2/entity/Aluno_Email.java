@@ -13,11 +13,12 @@ public class Aluno_Email {
     protected Aluno_Email() {}
 
     public Aluno_Email(String emailAddress) {
-        if (emailAddress == null || !emailAddress.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+        if (emailAddress == null || !emailAddress.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             throw new IllegalArgumentException("Email inválido");
         }
         this.emailAddress = emailAddress;
     }
+
 
     public String getEmailAddress() {
         return emailAddress;

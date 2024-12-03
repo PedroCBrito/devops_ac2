@@ -52,7 +52,6 @@ public class AlunoControllerTest {
 
         Mockito.when(alunoService.listarTodosAlunos()).thenReturn(List.of(alunoMock));
 
-        // Realiza a requisição e verifica a resposta
         mockMvc.perform(MockMvcRequestBuilders.get("/alunos")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -68,7 +67,6 @@ public class AlunoControllerTest {
 
         Mockito.when(alunoService.buscarAluno(1L)).thenReturn(alunoMock);
 
-        // Realiza a requisição e verifica a resposta
         mockMvc.perform(MockMvcRequestBuilders.get("/alunos/1")
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -77,6 +75,25 @@ public class AlunoControllerTest {
                 .andExpect(jsonPath("$.cursos[0]").value("Matemática"))
                 .andExpect(jsonPath("$.cursos[1]").value("Física"));
     }
+
+    @Test
+    public void testGetAllAlunosMultiple() throws Exception {
+        Aluno aluno1 = criarAlunoMock();
+        Aluno aluno2 = new Aluno("João Souza", "joao@example.com");
+        aluno2.setId(2L);
+        aluno2.addCurso(new Curso("Química"));
+        aluno2.addCurso(new Curso("Biologia"));
+
+        Mockito.when(alunoService.listarTodosAlunos()).thenReturn(List.of(aluno1, aluno2));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/alunos")
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Maria Silva"))
+                .andExpect(jsonPath("$[1].nome").value("João Souza"))
+                .andExpect(jsonPath("$[1].email").value("joao@example.com"))
+                .andExpect(jsonPath("$[1].cursos[0]").value("Química"))
+                .andExpect(jsonPath("$[1].cursos[1]").value("Biologia"));
+    }
+
 }
-
-

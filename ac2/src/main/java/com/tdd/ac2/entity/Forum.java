@@ -18,21 +18,15 @@ public class Forum {
         Comentarios = new HashMap<>();
         Topicos = new HashMap<>();
     }
-
+    
     public void addComentario(Aluno aluno, String comentario) {
-        // Verifica se o aluno já comentou antes
-        if (Comentarios.containsKey(aluno)) {
-            String[] comentariosExistentes = Comentarios.get(aluno);
-            String[] novoComentarios = Arrays.copyOf(comentariosExistentes, comentariosExistentes.length + 1);
-       
-            novoComentarios[novoComentarios.length - 1] = comentario;
-           
-            Comentarios.put(aluno, novoComentarios);
-        } else {
-            
-            Comentarios.put(aluno, new String[]{comentario});
-        }
+        Comentarios.merge(aluno, new String[]{comentario}, (existentes, novos) -> {
+            String[] atualizados = Arrays.copyOf(existentes, existentes.length + 1);
+            atualizados[existentes.length] = novos[0];
+            return atualizados;
+        });
     }
+
 	
     // Método para adicionar tópico
     public void addTopico(Aluno aluno, String topico) {
@@ -50,28 +44,19 @@ public class Forum {
 
  // Função para verificar os alunos com mais comentários e tópicos somados
     public List<Aluno> verificarAlunoComMaisComentariosETopicosDoForum() {
+        // Soma os comentários e tópicos para cada aluno
         Map<Aluno, Integer> interacoesPorAluno = new HashMap<>();
-        
-        // Contabiliza interações dos alunos que possuem comentários
-        for (Map.Entry<Aluno, String[]> entry : Comentarios.entrySet()) {
-            Aluno aluno = entry.getKey();
-            int numComentarios = entry.getValue().length;
-            int numTopicos = Topicos.getOrDefault(aluno, new String[0]).length;  // Tópicos do aluno
-            interacoesPorAluno.put(aluno, numComentarios + numTopicos);
-        }
+        Comentarios.forEach((aluno, comentarios) -> 
+            interacoesPorAluno.merge(aluno, comentarios.length, Integer::sum));
+        Topicos.forEach((aluno, topicos) -> 
+            interacoesPorAluno.merge(aluno, topicos.length, Integer::sum));
 
-        // Contabiliza interações dos alunos que possuem apenas tópicos
-        for (Map.Entry<Aluno, String[]> entry : Topicos.entrySet()) {
-            Aluno aluno = entry.getKey();
-            if (!interacoesPorAluno.containsKey(aluno)) {  // Se ainda não foi contabilizado
-                interacoesPorAluno.put(aluno, entry.getValue().length);
-            }
-        }
+        // Identifica o maior número de interações
+        int maxInteracoes = interacoesPorAluno.values().stream()
+                .max(Integer::compare)
+                .orElse(0);
 
-        // Verifica o maior número de interações
-        int maxInteracoes = interacoesPorAluno.values().stream().max(Integer::compare).orElse(0);
-
-        // Retorna a lista dos alunos com o maior número de interações
+        // Filtra os alunos com o maior número de interações
         return interacoesPorAluno.entrySet().stream()
                 .filter(entry -> entry.getValue() == maxInteracoes)
                 .map(Map.Entry::getKey)
@@ -109,6 +94,9 @@ public class Forum {
 		
 	}
 
-
+	public String[] getComentarios(Aluno aluno) {
+	    // Retorna os comentários do aluno, ou um array vazio se o aluno não tiver comentários
+	    return Comentarios.getOrDefault(aluno, new String[]{});
+	}
 
 }
